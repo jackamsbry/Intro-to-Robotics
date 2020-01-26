@@ -8,7 +8,6 @@ from pybricks.parameters import (Port, Stop, Direction, Button, Color,
 from pybricks.tools import print, wait, StopWatch
 from pybricks.robotics import DriveBase
 
-# Write your program here
 import ubinascii, ujson, urequests, utime
      
 Key = 'w-TANbEa0fhalpKtCPNGF0Zuuc6J3r9st6-FSUv55v'
@@ -53,16 +52,42 @@ def Create_SL(Tag, Type):
 
 
 ultrasonic = UltrasonicSensor(Port.S1)
-grabMotor = Motor(Port.D)
+grabMotor = Motor(Port.B)
+
+l_motor = Motor(Port.D, Direction.COUNTERCLOCKWISE)
+r_motor = Motor(Port.A, Direction.COUNTERCLOCKWISE)
+driveBase = DriveBase(l_motor, r_motor, 56, 164)
 
 grabMotor.dc(0)
-isGrab = False
+wasGrab = False
 
-ultSnc = ultrasonic.distance()
-print(ultSnc)
-print(type(ultSnc))
-isGrab = Get_SL('isGrab')
-Get_SL('UltraSonicDist')
-Put_SL('UltraSonicDist','INTEGER', ultSnc)
+while True :
+     isGrab = Get_SL('isGrab')
+     isGrab = True if isGrab == "true" else False
+     isDrive = Get_SL('isDrive')
+     isDrive = True if isDrive == "true" else False
+     if isGrab == True and wasGrab == False:
+          grabMotor.dc(100)
+          wait(2000)
+          grabMotor.dc(0)
+          wasGrab = isGrab
+     
+     if isGrab == False and wasGrab == True:
+          grabMotor.dc(-100)
+          wait(2000)
+          grabMotor.dc(0)
+          wasGrab = isGrab
+
+     if isDrive == True :
+          driveBase.drive(250,0)
+     elif isDrive == False :
+          driveBase.drive(0, 0)
+
+
+               
+          
+          
+          
+          
 
     
