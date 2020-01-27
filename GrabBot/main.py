@@ -56,11 +56,17 @@ grabMotor = Motor(Port.B)
 
 l_motor = Motor(Port.D, Direction.COUNTERCLOCKWISE)
 r_motor = Motor(Port.A, Direction.COUNTERCLOCKWISE)
-driveBase = DriveBase(l_motor, r_motor, 56, 164)
+
+wheel_dia = 56
+wheel_spacing = 164
+
+driveBase = DriveBase(l_motor, r_motor, wheel_dia, wheel_spacing)
 
 grabMotor.dc(0)
 wasGrab = False
 Put_SL('isGrab','BOOLEAN', 'false')
+
+dist = 200
 
 while True :
      isGrab = Get_SL('isGrab')
@@ -80,16 +86,22 @@ while True :
           grabMotor.dc(0)
           wasGrab = isGrab
 
-     print(driveCMD)
-     if driveCMD == 0 :
-          driveBase.drive(0,0)
-     elif driveCMD == 1 :
-          driveBase.drive(100,0)
-     elif driveCMD == 2 :
+     kp = float(Get_SL('kp'))
+     ultDist = ultrasonic.distance()
+     print(ultDist)
+     error = ultDist - dist
+    
+     speed = kp * error
+
+     if driveCMD == '0' :
+          driveBase.stop(Stop.BRAKE)
+     elif driveCMD == '1' :
+          driveBase.drive(speed,0)
+     elif driveCMD == '2' :
           driveBase.drive(10,45)
-     elif driveCMD == 3 :
+     elif driveCMD == '3' :
           driveBase.drive(10,-45)
-     elif driveCMD == 4 :
+     elif driveCMD == '4' :
           driveBase.drive(-100,0)
 
      if isSearch == True :
