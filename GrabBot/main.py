@@ -60,6 +60,7 @@ driveBase = DriveBase(l_motor, r_motor, 56, 164)
 
 grabMotor.dc(0)
 wasGrab = False
+Put_SL('isGrab','BOOLEAN', 'false')
 
 while True :
      isGrab = Get_SL('isGrab')
@@ -82,12 +83,3 @@ while True :
           driveBase.drive(250,0)
      elif isDrive == False :
           driveBase.drive(0, 0)
-
-
-               
-          
-          
-          
-          
-
-    
