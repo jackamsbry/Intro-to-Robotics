@@ -65,8 +65,9 @@ Put_SL('isGrab','BOOLEAN', 'false')
 while True :
      isGrab = Get_SL('isGrab')
      isGrab = True if isGrab == "true" else False
-     isDrive = Get_SL('isDrive')
-     isDrive = True if isDrive == "true" else False
+     isSearch = Get_SL('isSearch')
+     isSearch = True if isSearch == "true" else False
+     driveCMD = Get_SL('driveCMD')
      if isGrab == True and wasGrab == False:
           grabMotor.dc(100)
           wait(2000)
@@ -79,7 +80,25 @@ while True :
           grabMotor.dc(0)
           wasGrab = isGrab
 
-     if isDrive == True :
-          driveBase.drive(250,0)
-     elif isDrive == False :
-          driveBase.drive(0, 0)
+     print(driveCMD)
+     if driveCMD == 0 :
+          driveBase.drive(0,0)
+     elif driveCMD == 1 :
+          driveBase.drive(100,0)
+     elif driveCMD == 2 :
+          driveBase.drive(10,45)
+     elif driveCMD == 3 :
+          driveBase.drive(10,-45)
+     elif driveCMD == 4 :
+          driveBase.drive(-100,0)
+
+     if isSearch == True :
+          driveBase.drive(0, 30)
+          ultDist = ultrasonic.distance()
+          print('Searching for Object')
+          if ultDist < 500 :
+               print('Found!')
+               isSearch = False
+               Put_SL('isSearch','BOOLEAN','false')
+               Put_SL('driveCMD','NUMBER','1')
+               
