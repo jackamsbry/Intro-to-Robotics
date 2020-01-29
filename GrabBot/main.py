@@ -9,7 +9,7 @@ from pybricks.tools import print, wait, StopWatch
 from pybricks.robotics import DriveBase
 from passwords import Key as Key
 
-import ubinascii, ujson, urequests, utime
+import ubinascii, ujson, utime, urequests
 
 def SL_setup():
      urlBase = "https://api.systemlinkcloud.com/nitag/v2/tags/"
@@ -48,6 +48,24 @@ def Create_SL(Tag, Type):
           urequests.put(urlTag,headers=headers,json=propName).text
      except Exception as e:
           print(e)
+
+
+def getQuote():
+     urlVal = "http://api.kanye.rest/"
+     headers ={"Accept":"application/json"}
+     try:
+          value = urequests.get(urlVal).text
+          data = ujson.loads(value)
+          result = data.get("quote")
+
+     except Exception as e:
+          print(e)
+          result = "failed"
+     return result
+
+yeQuote = getQuote()
+
+Put_SL("yeQuote", "STRING", yeQuote)
 
 ultrasonic = UltrasonicSensor(Port.S1)
 grabMotor = Motor(Port.B)
@@ -128,88 +146,5 @@ while True :
                     ultDist = ultrasonic.distance()
                     if ultDist < best_dist:
                          best_dist = ultDist
-                         time1 = watch.time()
-                         time_dif = time1 - time_prev
-                         print(time_dif)
-                    time_prev = time1     
-                    if time_dif > 6000:
-                              watch.pause()
-                              watch.reset()
-                              time_prev = 0
-
-                    
-
-
-                    
-                    
-
-
-
-
-          
-          
-          
-          
-          
-          # ultDist = ultrasonic.distance()
-          # print(ultDist)
-          # #print(turn_thresh)
-          # if isTurn:
-          # #Sweep search to minimize err in initial search direction only for first loop
-          #      if count == 0:
-          #           if init_search_dir == '0':
-          #                driveBase.drive_time(0,-45,1500)
-          #           elif init_search_dir == '1':
-          #                driveBase.drive_time(0,45,1500)
-          #           else:
-          #                pass
-          #      print('Sweeping')
-          #      while watch.time() < 2000:
-          #           driveBase.drive(0,45)
-          #           watch.resume()
-          #           ultDist = ultrasonic.distance()
-          #           if ultDist < best_dist:
-          #                best_dist = ultDist
-          #                break
-          #      watch.pause()
-          #      watch.reset()
-
-          #      while watch.time() < 4000:
-          #           driveBase.drive(0,-45)
-          #           watch.resume()
-          #           ultDist = ultrasonic.distance()
-          #           if ultDist <= best_dist:
-          #                best_dist = ultDist
-          #                break
-          #      watch.pause()
-          #      watch.reset()
-
-          #      while watch.time() < 4000:
-          #           driveBase.drive(0,45)
-          #           watch.resume()
-          #           ultDist = ultrasonic.distance()
-          #           if ultDist <= best_dist:
-          #                best_dist = ultDist
-          #                break
-                         
-          #      watch.pause()
-          #      watch.reset()
-          #      print('Best Distance is {}'.format(best_dist))
-          #      count += 1
-          #      turn_thresh *= 0.99
-          #      isTurn = False
-
-          # if best_dist > dist_thresh or ultDist > dist_thresh:
-          #      watch.resume()
-          #      ultDist = ultrasonic.distance()
-          #      kp = 0.9
-          #      err = ultDist - dist_thresh
-          #      print('Error is {}'.format(err))
-          #      speed = kp * err
-          #      print('Driving')
-          #      driveBase.drive(speed, 0)
-          #      if watch.time() >= 1500:
-          #           watch.pause()
-          #           watch.reset()
-          #           isTurn = True
-          
+                         watch.pause()
+                         watch.reset()
