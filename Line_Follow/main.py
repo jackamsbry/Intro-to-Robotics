@@ -8,7 +8,11 @@ from pybricks.parameters import (Port, Stop, Direction, Button, Color,
 from pybricks.tools import print, wait, StopWatch
 from pybricks.robotics import DriveBase
 
-import uio
+from pybricks.ev3devio import Ev3devSensor 
+import utime
+import ev3dev2
+import ev3Sensor
+from ev3dev2.port import LegoPort
 
 # Write your program here
 brick.sound.beep()
@@ -22,12 +26,20 @@ dist_thresh = 100
 
 filename = './log.txt'
 fin = uio.open(filename, )
-while True:
-    dist = ultrasonic.distance()
-    kp = 0.8
-    error = dist - dist_thresh
-    
-    speed = kp * error
-    left.run(-speed)
-    right.run(-speed)
 
+def grayscale():
+    
+
+
+if __name__=="main":
+    def main():
+        brick.sound.beep()
+        sens = LegoPort(address ='ev3-ports:in1') # which port?? 1,2,3, or 4
+        sens.mode = 'ev3-analog'
+        utime.sleep(0.5)
+        sensor_left=ev3Sensor(Port.S1) # same port as above
+        while True:
+            print(sensor_left.readvalue())
+            wait(200)
+
+    main()
