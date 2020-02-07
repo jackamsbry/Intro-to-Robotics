@@ -50,15 +50,13 @@ def Create_SL(Tag, Type):
           urequests.put(urlTag,headers=headers,json=propName).text
      except Exception as e:
           print(e)
+          
 # Write your program here
-
-
 left = Motor(Port.A)
 right = Motor(Port.D)
 light = ColorSensor(Port.S1)
 
 robot = DriveBase(left, right, 56, 152)
-
 
 while True:
      reflection = light.reflection()
