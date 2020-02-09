@@ -18,7 +18,7 @@ def moveEncode(x, y):
     x = int(x)
     y = int(y)
 
-    moveCMD = (x<<4) | (y>>4)
+    moveCMD = (x>>4) | (y<<4)
     moveCMD = bytes(moveCMD)
     return moveCMD
 
@@ -58,8 +58,8 @@ def main():
 
         if uartComm.waiting() > 0:
             uartComm.read()
-        else:
-            uartComm.write(moveCMD) 
+        
+        uartComm.write(moveCMD) 
 
         if resetAngle.pressed():
             xMotor.reset_angle(0)

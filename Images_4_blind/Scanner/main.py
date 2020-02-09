@@ -9,10 +9,7 @@ from pybricks.tools import print, wait, StopWatch
 from pybricks.robotics import DriveBase
 from passwords import Key
 
-import ubinascii, ujson, utime, urequests
-from pybricks.ev3devio import Ev3devSensor 
-import ev3dev2
-from ev3dev2.port import LegoPort 
+from pybricks.iodevices import UARTDevice
 
 # Write your program here
 
@@ -21,15 +18,25 @@ def main():
      right = Motor(Port.D)
      light = ColorSensor(Port.S1)
      robot = DriveBase(left, right, 56, 152)
-     uartPort = LegoPort('ev3-ports:in1')
+     uartComm = UARTDevice(Port.S2, 9600)
 
      while True:
           reflection = light.reflection()
      
-          if reflection < 70:
-               Put_SL('line','BOOLEAN','true')
-          else: 
-               Put_SL('line','BOOLEAN','false')
+          if uartComm.waiting() > 0:
+               data = uartComm.read()
+               data = str(data)
+               print(data)
+               x = int(data[:-4])
+               y = int(data[-4:])
 
-          #robot.drive(0,10)
 
+          if reflection > 70:
+               t = bytes(True)
+               uartComm.write(t)
+          
+          speed = y - 64
+          direction = x -64
+          robot.drive(speed, direction)
+
+main()
