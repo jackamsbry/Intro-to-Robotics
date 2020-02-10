@@ -20,13 +20,6 @@ def moveEncode(x, y):
     wait(100)
     return moveCMD + ''.join(['B' for i in range(32-len(moveCMD))])
 
-def constrain(number, range):
-    if number > range[1]:
-        number = range[1]
-    elif number < range[0]:
-        number = range[0]
-    return number
-
 #Main Function
 def main():
     joyMove = TouchSensor(Port.S1)
@@ -34,41 +27,42 @@ def main():
     yMotor = Motor(Port.D)
     resetAngle = TouchSensor(Port.S3)
     uartComm = UARTDevice(Port.S2, 9600)
-
+    #main loop
     while True:
-        
         #initial angle reading (correcting signs of angles)
         x = - xMotor.angle()
         y = - yMotor.angle()
-        # x += 90
-        # y += 90
-        # #convert x and y values to a number between 0 and 127
-        # x *= (256/180)
-        # y *= (256/180)
-        # x = int(x)
-        # y = int(y)
-        # #constrain numbers to be within range of an 4 bit number
-        # x_scale = [0, 255]
-        # y_scale = [0, 255]
-        # x = constrain(x, x_scale)
-        # y = constrain(y, y_scale)
-
-        #convert x and y to single 8 bit number
+        
+        #Encode the values in a json object
         moveCMD = moveEncode(x, y)
 
-        if uartComm.waiting() > 0:
-            data_raw = uartComm.read()
+        #try to read values from serial
+        try:
+            data_raw = uartComm.read(32)
+            data = ujson.loads(data_raw)
+            isLine = data['isLine']
+
+        except Exception as e:
+            uartComm.clear()
+            print(e)
+            print("Buffer Cleared")
+        
+        #try to write values to serial    
         try:
             uartComm.write(moveCMD) 
-        except:
+        except Exception as e:
+            print(e)
             print("Write Failed")
 
         if resetAngle.pressed():
             xMotor.reset_angle(0)
             yMotor.reset_angle(0)
-
-        xMotor.stop(Stop.COAST)
-        yMotor.stop(Stop.COAST)
+        if isLine:
+            xMotor.run(0.4 * x)
+            yMotor.run(0.4 * y)
+        else: 
+            xMotor.stop(Stop.COAST)
+            yMotor.stop(Stop.COAST)
 
 main()
         
