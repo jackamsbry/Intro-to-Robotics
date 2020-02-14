@@ -12,40 +12,45 @@ from math import *
 import utime, ujson
 from pybricks.iodevices import UARTDevice
 
+resetAngle = TouchSensor(Port.S1)
+xMotor = Motor(Port.A)
+yMotor = Motor(Port.D)
+hapticMotor = Motor(Port.B)
+uartComm = UARTDevice(Port.S2, 9600)
+dZone = 15
 
 
 def moveEncode(x, y):
-    coords = {'x':x, 'y':y}
+    coords = {'x' : x, 'y' : y}
     moveCMD =  ujson.dumps(coords)
     wait(100)
-    return moveCMD + ''.join(['B' for i in range(32-len(moveCMD))])
+    return moveCMD + ''.join(['B' for i in range(24-len(moveCMD))])
 
 #Main Function
 def main():
-    joyMove = TouchSensor(Port.S1)
-    xMotor = Motor(Port.A)
-    yMotor = Motor(Port.D)
-    resetAngle = TouchSensor(Port.S3)
-    uartComm = UARTDevice(Port.S2, 9600)
+    reflection = 100
     #main loop
     while True:
         #initial angle reading (correcting signs of angles)
         x = - xMotor.angle()
-        y = - yMotor.angle()
+        y = yMotor.angle()
         
-        #Encode the values in a json object
-        moveCMD = moveEncode(x, y)
+        if abs(y) < dZone:
+            y = 0
 
+        #Encode the values in a json object
+        #deadzone
+        moveCMD = moveEncode(x, y)
         #try to read values from serial
         try:
-            data_raw = uartComm.read(32)
+            data_raw = uartComm.read(24).decode().replace('B', '')
             data = ujson.loads(data_raw)
-            isLine = data['isLine']
+            reflection = data['signal']
 
         except Exception as e:
-            uartComm.clear()
             print(e)
-            print("Buffer Cleared")
+            uartComm.clear()
+            print("Read Failed")
         
         #try to write values to serial    
         try:
@@ -57,12 +62,14 @@ def main():
         if resetAngle.pressed():
             xMotor.reset_angle(0)
             yMotor.reset_angle(0)
-        if isLine:
-            xMotor.run(0.4 * x)
-            yMotor.run(0.4 * y)
+            print('Angle Reset')
+
+        
+        if reflection < 70:
+            hapticMotor.dc(100)
         else: 
-            xMotor.stop(Stop.COAST)
-            yMotor.stop(Stop.COAST)
+            hapticMotor.dc(0)
+        
 
 main()
         
