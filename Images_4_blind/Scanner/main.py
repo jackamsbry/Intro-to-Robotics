@@ -7,36 +7,61 @@ from pybricks.parameters import (Port, Stop, Direction, Button, Color,
                                  SoundFile, ImageFile, Align)
 from pybricks.tools import print, wait, StopWatch
 from pybricks.robotics import DriveBase
-from passwords import Key
 
 from pybricks.iodevices import UARTDevice
 
+import ujson
+
 # Write your program here
 
+left = Motor(Port.A)
+right = Motor(Port.D)
+light = ColorSensor(Port.S1)
+horz = Motor(Port.B)
+robot = DriveBase(left, right, 56, 152)
+
+def reading(reflection):
+    reflect = {'signal':reflection}
+    signal = ujson.dumps(reflect)
+    wait(100)
+    return signal + ''.join(['B' for i in range(24-len(signal))])
+
+def constrain(value, range):
+    if value > range[1]:
+        value = range[1]
+    elif value < range[0]:
+        value = range[0]
+
 def main():
-     left = Motor(Port.A)
-     right = Motor(Port.D)
-     light = ColorSensor(Port.S1)
-     robot = DriveBase(left, right, 56, 152)
-     uartComm = UARTDevice(Port.S2, 9600)
+     uartComm = UARTDevice(Port.S2, 9600, 100)
+     uartComm.clear()
+     xlimits = [-310, 310]
 
      while True:
-          reflection = light.reflection()
-     
-          if uartComm.waiting() > 0:
-               data = uartComm.read()
-               data = str(data)
-               print(data)
-               x = int(data[:-4])
-               y = int(data[-4:])
+        reflection = light.reflection()
+        try:
+            data_raw = uartComm.read(24).decode().replace('B', '')
+            data = ujson.loads(data_raw)
+        except Exception as e:
+            uartComm.clear()
+            print(e)
+            print('Read Failed')
+            data = {'x':0, 'y':0} #need this or robot.drive throws an error
+        
+        try:
+            signal = reading(reflection)
+            uartComm.write(signal)
+            print(signal) #prints json signal
+        except Exception as e:
+            print(e)
+            print("Write Failed")
+        #print(data['x'], data['y'])
+        robot.drive(data['y']/2, 0)
+        print(horz.angle())
+        horiz_dist = data['x'] * (360/90)
+        constrain(horiz_dist, xlimits)
+        horz.run_target(100,horiz_dist)
+    
 
-
-          if reflection > 70:
-               t = bytes(True)
-               uartComm.write(t)
-          
-          speed = y - 64
-          direction = x -64
-          robot.drive(speed, direction)
 
 main()
