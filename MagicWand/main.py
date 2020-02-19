@@ -66,17 +66,23 @@ while True:
 
         note_time = 300
         # First check positive rotation
+        # Roll
         if ((abs(imumeans[3]) > threshold[0]) and (imumeans[3] > 0)):
             ev3.speaker.beep(261, note_time)
+        # Pitch
         elif ((abs(imumeans[4]) > threshold[1]) and (imumeans[4] > 0)):
             ev3.speaker.beep(220, note_time)
+        # Yaw
         elif ((abs(imumeans[5]) > threshold[2]) and (imumeans[5] > 0)):
             ev3.speaker.beep(196, note_time)
         # Then check negative rotation
+        # Roll
         elif ((abs(imumeans[3]) > threshold[0]) and (imumeans[3] < 0)):
             ev3.speaker.beep(330, note_time)
+        # Pitch
         elif ((abs(imumeans[4]) > threshold[1]) and (imumeans[4] < 0)):
             ev3.speaker.beep(147, note_time)
+        # Yaw
         elif ((abs(imumeans[5]) > threshold[2]) and (imumeans[5] < 0)):
             ev3.speaker.beep(294, note_time)
 
