@@ -63,16 +63,18 @@ while True:
         for k in range(len(imumeans)):
             imumeans[k] = imumeans[k]/count
 
+        # First check positive rotation
         if ((abs(imumeans[3]) > threshold[0]) and (imumeans[3] > 0)):
-            ev3.speaker.beep(147, 500)
+            ev3.speaker.beep(261, 500)
         elif ((abs(imumeans[4]) > threshold[1]) and (imumeans[4] > 0)):
             ev3.speaker.beep(220, 500)
         elif ((abs(imumeans[5]) > threshold[2]) and (imumeans[5] > 0)):
             ev3.speaker.beep(196, 500)
+        # Then check negative rotation
         elif ((abs(imumeans[3]) > threshold[0]) and (imumeans[3] < 0)):
             ev3.speaker.beep(330, 500)
         elif ((abs(imumeans[4]) > threshold[1]) and (imumeans[4] < 0)):
-            ev3.speaker.beep(261, 500)
+            ev3.speaker.beep(147, 500)
         elif ((abs(imumeans[5]) > threshold[2]) and (imumeans[5] < 0)):
             ev3.speaker.beep(294, 500)
 
