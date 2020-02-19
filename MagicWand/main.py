@@ -7,6 +7,8 @@ from pybricks.tools import wait, StopWatch
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 
+import serial
+
 # Write your program here
 ev3 = EV3Brick()
 ev3.speaker.beep()
@@ -33,7 +35,6 @@ imumeans = [0, 0, 0, 0, 0, 0]
 threshold = [100, 100, 100]
 button = TouchSensor(Port.S1)
 
-import serial
 s=serial.Serial("/dev/ttyACM0",9600)
 while True:
     if button.pressed() == True:
@@ -85,8 +86,6 @@ while True:
         # Yaw
         elif ((abs(imumeans[5]) > threshold[2]) and (imumeans[5] < 0)):
             ev3.speaker.beep(294, note_time)
-
-
 
         print(imumeans)
 
