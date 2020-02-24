@@ -51,8 +51,4 @@ while True:
         print("Read Failed")
         print(errMsg)
 
-
-    
-    
-
     count += 1
