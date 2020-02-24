@@ -44,7 +44,7 @@ while True:
                 wasBrick = 1
             reflectMean = 0
             reflectMeanNum = 0
-        else:
+        else: 
             if wasBrick == 1:
                 wasBrick = 0
             print("No Brick")
