@@ -22,9 +22,8 @@ uart = UARTDevice(Port.S4, 115200, timeout=0)
 count = 0
 reflectMean = 0
 reflectMeanNum = 0
-meanSize = 20
+meanSize = 10
 numStep = 0
-wasBrick = 0
 
 while True:
     hopperMotor.dc(60)
@@ -35,25 +34,25 @@ while True:
     else: 
         reflectMean = reflectMeanNum / meanSize
         print(reflectMean)
-        if reflectMean > 0.5 :
-            isBrick = 1
+        if reflectMean > 0 :
             print("Brick Detected")
-            if wasBrick == 0:
-                sendData = bytes('1', 'utf-8')
-                uart.write(sendData)
-                wasBrick = 1
+            isBrick = bytes('1', 'utf-8')
+            uart.write(isBrick)
             reflectMean = 0
             reflectMeanNum = 0
         else:
-            if wasBrick == 1:
-                wasBrick = 0
             print("No Brick")
+            pass
     
     try:
         rawData = uart.read()
-
+        
     except Exception as errMsg:
         print("Read Failed")
         print(errMsg)
+
+
+    
+    
 
     count += 1
