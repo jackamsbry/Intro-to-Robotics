@@ -38,7 +38,7 @@ time.resume()
 
 
 while True:
-    hopperMotor.dc(80)
+    hopperMotor.dc(90)
     conveyorMotor.run(-35)
     reflect = light.reflection()
     if count % meanSize:
@@ -73,13 +73,13 @@ while True:
             brickQueue.pop(0)
             if isRed == True:
                 if currPos == 180:
-                    bucketMotor.run_target(100, redPos)
+                    bucketMotor.run_target(150, redPos)
                     currPos = redPos
                 else:
                     pass
             else:
                 if currPos == 0:
-                    bucketMotor.run_target(100, trashPos)
+                    bucketMotor.run_target(150, trashPos)
                     currPos = trashPos
                 else:
                     pass
