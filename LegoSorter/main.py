@@ -38,7 +38,7 @@ time.resume()
 
 
 while True:
-    hopperMotor.dc(60)
+    hopperMotor.dc(80)
     conveyorMotor.run(-35)
     reflect = light.reflection()
     if count % meanSize:
@@ -47,9 +47,7 @@ while True:
         reflectMean = reflectMeanNum / meanSize
         # Average every 10 readings
         reflectMean = reflectMeanNum / meanSize
-        print(reflectMean)
         if reflectMean > 0.5:
-            print("Brick Detected")
             if wasBrick == 0:
                 sendData = bytes('1', 'utf-8')
                 uart.write(sendData)
@@ -60,34 +58,32 @@ while True:
         else: 
             if wasBrick == 1:
                 wasBrick = 0
-            print("No Brick")
-
+            
     # Try to read from serial port
     try:
         getData = uart.read(1).decode('utf-8')
-        print(getData)
-        isRed = True if getData == "b'0'" else False
-
-    except Exception as errMsg:
+        isRed = True if getData == "0" else False
+        print(isRed)
+    except Exception:
         #print("Read Failed")
-        print(errMsg)
+        pass
 
     try:
-        if (time.time() > (brickQueue[0] + 10000)):
+        if (time.time() > (brickQueue[0] + 9500)):
             brickQueue.pop(0)
             if isRed == True:
                 if currPos == 180:
-                    bucketMotor.run_target(50, redPos)
+                    bucketMotor.run_target(100, redPos)
                     currPos = redPos
                 else:
                     pass
             else:
                 if currPos == 0:
-                    bucketMotor.run_target(50, trashPos)
+                    bucketMotor.run_target(100, trashPos)
                     currPos = trashPos
                 else:
                     pass
     except:
-        print('Nothing in Queue')
+        pass
 
     count += 1
