@@ -19,6 +19,9 @@ launchMotor = Motor(Port.B)
 
 distanceSensor = UltrasonicSensor(Port.S1)
 
+ballOffsetx = 0
+ballOffsety = 0
+
 def SL_setup():
      urlBase = "https://api.systemlinkcloud.com/nitag/v2/tags/"
      headers = {"Accept":"application/json","x-ni-api-key":Key}
@@ -57,5 +60,13 @@ def Create_SL(Tag, Type):
      except Exception as e:
           print(e)
 
+def newtonSpeed(dist):
+
+def main():
+    mass = 0
+    releaseAngle = 0
+
+    while True:
+        dist = distanceSensor.distance()
 
 
