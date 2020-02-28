@@ -60,7 +60,7 @@ def Create_SL(Tag, Type):
      except Exception as e:
           print(e)
 
-def newtonSpeed(dist):
+def newtonSpeed(dist, mass, angle):
 
 def main():
     mass = 0
