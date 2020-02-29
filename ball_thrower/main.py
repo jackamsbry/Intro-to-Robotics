@@ -8,19 +8,24 @@ from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 from passwords import Key as Key
 
-import ubinascii, ujson, utime, urequests
+import ubinascii, ujson, utime, urequests, math
 
 # Write your program here
 ev3 = EV3Brick()
 ev3.speaker.beep()
 
-angleMotor = Motor(Port.A)
-launchMotor = Motor(Port.B)
+angleMotor = Motor(Port.B, Direction.COUNTERCLOCKWISE)
+launchMotor = Motor(Port.A, Direction.CLOCKWISE, [24, 40])
 
-distanceSensor = UltrasonicSensor(Port.S1)
+distanceSensor = UltrasonicSensor(Port.S4)
 
-ballOffsetx = 0
-ballOffsety = 0
+#Define Constants
+ballOffsetx = -70/1000
+ballOffsety = 140/1000
+armRadius = 144/1000
+cupHeight = 120/1000
+armMass = 24 * 1.1
+ballMass = 10
 
 def SL_setup():
      urlBase = "https://api.systemlinkcloud.com/nitag/v2/tags/"
@@ -60,13 +65,52 @@ def Create_SL(Tag, Type):
      except Exception as e:
           print(e)
 
-def newtonSpeed(dist, mass, angle):
+def newtonSpeed(dist, angle):
+    angle_rad = math.radians(angle)
+    dx = dist - ballOffsetx
+    dy = cupHeight - ballOffsety
+    speed = (3*math.sqrt(109/2)*dx*(1/math.cos(angle_rad)))/(10*math.sqrt(dx*math.tan(angle_rad)-dy))
+    return speed
+    
+
+def momentumCalc(speed):
+    mA = armMass
+    mB = ballMass
+    vA1 = speed
+    vB1 = 0
+    epsilon = 0.95
+    vA2 = speed * epsilon
+    vB2 = (mA/mB) * (vA1 - vA2) 
+    return vB2/armRadius
+
+def optimalArc(dist):
+    return 0
 
 def main():
-    mass = 0
     releaseAngle = 0
+    wasLaunch = False
 
     while True:
-        dist = distanceSensor.distance()
+        dist = distanceSensor.distance()/1000
+        isLaunch = True if Get_SL("isLaunch") == "true" else False
+        findAngle = True if Get_SL("findAngle") == "true" else False
+        if findAngle:
+            releaseAngle = optimalArc(dist)
+        else:
+            releaseAngle = int(Get_SL("releaseAngle"))
+        angleMotor.run_target(100, releaseAngle)
+        speed = newtonSpeed(dist, releaseAngle)
+        ang_speed = momentumCalc(speed)
+        ang_speed = round(math.degrees(ang_speed))
 
+        if isLaunch == True and wasLaunch == False:
+            launchMotor.run_angle(ang_speed, 270)
+            launchMotor.stop(Stop.HOLD)
+            wasLaunch = True
 
+        if isLaunch == False and wasLaunch == True:
+            launchMotor.run_angle(ang_speed, -270)
+            launchMotor.stop(Stop.HOLD)
+            wasLaunch = False
+
+main()
