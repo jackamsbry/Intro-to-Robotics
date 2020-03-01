@@ -15,16 +15,17 @@ ev3 = EV3Brick()
 ev3.speaker.beep()
 
 angleMotor = Motor(Port.B, Direction.COUNTERCLOCKWISE)
-launchMotor = Motor(Port.A, Direction.CLOCKWISE, [24, 40])
+launchMotor = Motor(Port.A, Direction.CLOCKWISE, [40, 24])
 
 distanceSensor = UltrasonicSensor(Port.S4)
 
 #Define Constants
-ballOffsetx = -70/1000
+ballOffsetx = -66/1000
 ballOffsety = 140/1000
 armRadius = 144/1000
-cupHeight = 120/1000
-armMass = 24 * 1.1
+cupHeight = 122/1000
+cupRadius = 100/2000
+armMass = 24
 ballMass = 10
 
 def SL_setup():
@@ -67,32 +68,34 @@ def Create_SL(Tag, Type):
 
 def newtonSpeed(dist, angle):
     angle_rad = math.radians(angle)
-    dx = dist - ballOffsetx
-    dy = cupHeight - ballOffsety
+    dx = dist - ballOffsetx + cupRadius
+    dy = cupHeight - (ballOffsety + (.02529 * math.sin(angle_rad)))
     speed = (3*math.sqrt(109/2)*dx*(1/math.cos(angle_rad)))/(10*math.sqrt(dx*math.tan(angle_rad)-dy))
-    print(speed)
-    return speed/armRadius
+    return speed
     
 
 def momentumCalc(speed):
     mA = armMass
     mB = ballMass
-    vA1 = speed
-    vB1 = 0
-    epsilon = 0.95
-    vA2 = speed * epsilon
-    vB2 = (mA/mB) * (vA1 - vA2) 
-    return (vB2* math.pi)/armRadius
+    massRatio = mB/mA
+    epsilon = 0.75
+    vB2 = speed
+    vA1 = (vB2 * (massRatio + 1))/(1 + epsilon)
+    return (vA1)/armRadius
 
 def bestArc(dist):
     return 0
 
 def main():
     releaseAngle = 0
+    #Bring arm up before it hits the ball
+    launchMotor.run_angle(200, -120)
     wasLaunch = False
 
     while True:
         sum = 0
+        launchMotor.stop(Stop.HOLD)
+        #Find the average distance from several data points
         for value in range(10):
             dist = distanceSensor.distance()/1000
             sum += dist
@@ -100,12 +103,13 @@ def main():
         isLaunch = True if Get_SL("isLaunch") == "true" else False
         findAngle = True if Get_SL("findAngle") == "true" else False
         if findAngle:
-            releaseAngle = optimalArc(averageDist)
+            releaseAngle = bestArc(averageDist)
         else:
             releaseAngle = int(Get_SL("releaseAngle"))
         angleMotor.run_target(100, releaseAngle)
         speed = newtonSpeed(averageDist, releaseAngle)
-        ang_speed = round(math.degrees(speed))
+        ang_speed = momentumCalc(speed)
+        ang_speed = round(math.degrees(ang_speed))
         print(ang_speed)
 
         if isLaunch == True and wasLaunch == False:
@@ -114,7 +118,7 @@ def main():
             wasLaunch = True
 
         if isLaunch == False and wasLaunch == True:
-            launchMotor.run_angle(ang_speed, -270)
+            launchMotor.run_angle(500, -270)
             launchMotor.stop(Stop.HOLD)
             wasLaunch = False
 
