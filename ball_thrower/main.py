@@ -70,7 +70,8 @@ def newtonSpeed(dist, angle):
     dx = dist - ballOffsetx
     dy = cupHeight - ballOffsety
     speed = (3*math.sqrt(109/2)*dx*(1/math.cos(angle_rad)))/(10*math.sqrt(dx*math.tan(angle_rad)-dy))
-    return speed
+    print(speed)
+    return speed/armRadius
     
 
 def momentumCalc(speed):
@@ -81,9 +82,9 @@ def momentumCalc(speed):
     epsilon = 0.95
     vA2 = speed * epsilon
     vB2 = (mA/mB) * (vA1 - vA2) 
-    return vB2/armRadius
+    return (vB2* math.pi)/armRadius
 
-def optimalArc(dist):
+def bestArc(dist):
     return 0
 
 def main():
@@ -91,17 +92,21 @@ def main():
     wasLaunch = False
 
     while True:
-        dist = distanceSensor.distance()/1000
+        sum = 0
+        for value in range(10):
+            dist = distanceSensor.distance()/1000
+            sum += dist
+        averageDist = sum/10
         isLaunch = True if Get_SL("isLaunch") == "true" else False
         findAngle = True if Get_SL("findAngle") == "true" else False
         if findAngle:
-            releaseAngle = optimalArc(dist)
+            releaseAngle = optimalArc(averageDist)
         else:
             releaseAngle = int(Get_SL("releaseAngle"))
         angleMotor.run_target(100, releaseAngle)
-        speed = newtonSpeed(dist, releaseAngle)
-        ang_speed = momentumCalc(speed)
-        ang_speed = round(math.degrees(ang_speed))
+        speed = newtonSpeed(averageDist, releaseAngle)
+        ang_speed = round(math.degrees(speed))
+        print(ang_speed)
 
         if isLaunch == True and wasLaunch == False:
             launchMotor.run_angle(ang_speed, 270)
