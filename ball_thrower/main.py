@@ -15,7 +15,7 @@ ev3 = EV3Brick()
 ev3.speaker.beep()
 
 angleMotor = Motor(Port.B, Direction.COUNTERCLOCKWISE)
-launchMotor = Motor(Port.A, Direction.CLOCKWISE, [40, 24])
+launchMotor = Motor(Port.A, Direction.CLOCKWISE, [24, 40])
 
 distanceSensor = UltrasonicSensor(Port.S4)
 
@@ -24,7 +24,7 @@ ballOffsetx = -66/1000
 ballOffsety = 140/1000
 armRadius = 144/1000
 cupHeight = 122/1000
-cupRadius = 100/2000
+cupRadius = 90/1000
 armMass = 24
 ballMass = 10
 
@@ -71,25 +71,15 @@ def newtonSpeed(dist, angle):
     dx = dist - ballOffsetx + cupRadius
     dy = cupHeight - (ballOffsety + (.02529 * math.sin(angle_rad)))
     speed = (3*math.sqrt(109/2)*dx*(1/math.cos(angle_rad)))/(10*math.sqrt(dx*math.tan(angle_rad)-dy))
-    return speed
+    print(dist)
+    speed = speed*0.41 + 3*(dist**2) 
+    ang_speed = speed/(armRadius) 
+    return ang_speed
     
-
-def momentumCalc(speed):
-    mA = armMass
-    mB = ballMass
-    massRatio = mB/mA
-    epsilon = 0.75
-    vB2 = speed
-    vA1 = (vB2 * (massRatio + 1))/(1 + epsilon)
-    return (vA1)/armRadius
-
-def bestArc(dist):
-    return 0
 
 def main():
     releaseAngle = 0
     #Bring arm up before it hits the ball
-    launchMotor.run_angle(200, -120)
     wasLaunch = False
 
     while True:
@@ -102,24 +92,21 @@ def main():
         averageDist = sum/10
         isLaunch = True if Get_SL("isLaunch") == "true" else False
         findAngle = True if Get_SL("findAngle") == "true" else False
-        if findAngle:
-            releaseAngle = bestArc(averageDist)
-        else:
-            releaseAngle = int(Get_SL("releaseAngle"))
+        releaseAngle = int(Get_SL("releaseAngle"))
         angleMotor.run_target(100, releaseAngle)
         speed = newtonSpeed(averageDist, releaseAngle)
-        ang_speed = momentumCalc(speed)
-        ang_speed = round(math.degrees(ang_speed))
+        ang_speed = round(math.degrees(speed))
         print(ang_speed)
 
         if isLaunch == True and wasLaunch == False:
-            launchMotor.run_angle(ang_speed, 270)
+            launchMotor.run_angle(ang_speed, 360)
             launchMotor.stop(Stop.HOLD)
             wasLaunch = True
 
         if isLaunch == False and wasLaunch == True:
-            launchMotor.run_angle(500, -270)
+            launchMotor.run_target(500, 0)
             launchMotor.stop(Stop.HOLD)
             wasLaunch = False
+			
 
 main()
