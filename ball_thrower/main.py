@@ -87,6 +87,7 @@ def momentumCalc(speed):
 
      return angle
 
+#Linear regression model using machine learning
 def linearModel(learningRate, epochs, distData, angleData):
     m = 0
     b = 0
@@ -117,6 +118,7 @@ def linearModel(learningRate, epochs, distData, angleData):
 
     return [m, b]
 
+#Main function
 def main():
     releaseAngle = 35
     #Bring arm up before it hits the ball
