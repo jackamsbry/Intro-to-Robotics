@@ -160,14 +160,16 @@ def main():
                 dist = distanceSensor.distance()
                 total += dist
             averageDist = total/10
+            #Get control values from SL
             isLaunch = True if Get_SL("isLaunch") == "true" else False
             isLoad = True if Get_SL("isLoad") == "true" else False
             Put_SL("cupDistance", "STRING", str(averageDist))
+            #Calculate required speed
             speed = newtonSpeed(averageDist, releaseAngle)
             Put_SL("ballSpeed", "STRING", str(speed))
-            #armAngle = math.sqrt(abs((averageDist - model[1])/model[0]))
+            #armAngle = round(math.sqrt(abs((averageDist - model[1])/model[0])))
+            #Calculate angle using linear regression model
             armAngle = round(math.sqrt(abs((averageDist - 47.006)/0.0112)))
-            print(armAngle)
             armHeight = armRadius - (armRadius * math.cos(armAngle))
             Put_SL("armHeight", "STRING", str(armHeight))
             #Bring the arm up to the correct height
@@ -175,10 +177,12 @@ def main():
                 loadMotor.run_angle(300, round(armAngle), Stop.BRAKE)
                 wasLoad = True
 
+            #Release Arm
             if isLaunch == True and wasLaunch == False and isLoad == True:
                 switchMotor.run_target(200, 70)
                 wasLaunch = True
             
+            #Engage clutch
             if isLaunch == False and wasLaunch == True and isLoad == False:
                 switchMotor.run_target(200, 0)
                 wasLaunch = False
@@ -191,12 +195,16 @@ def main():
                 dist = distanceSensor.distance()/1000
                 total += dist
             averageDist = total/10
+            #Get control values from SL
             isLaunch = True if Get_SL("isLaunch") == "true" else False
             isLoad = True if Get_SL("isLoad") == "true" else False
             Put_SL("cupDistance", "STRING", str(averageDist))
+            #Calculate required speed
             speed = newtonSpeed(averageDist, releaseAngle)
             Put_SL("ballSpeed", "STRING", str(speed))
+            #Calculate the reqired arm angle
             armAngle = momentumCalc(speed)
+            #Scale values
             armAngle *= 1.8
             armHeight = armRadius - (armRadius * math.cos(armAngle))
             Put_SL("armHeight", "STRING", str(armHeight))
@@ -206,14 +214,15 @@ def main():
                 loadMotor.run_angle(300, round(math.degrees(armAngle)), Stop.BRAKE)
                 wasLoad = True
 
+            #Release arm
             if isLaunch == True and wasLaunch == False and isLoad == True:
                 switchMotor.run_target(200, 60)
                 wasLaunch = True
             
+            #Engage clutch
             if isLaunch == False and wasLaunch == True and isLoad == False:
                 switchMotor.run_target(200, 0)
                 wasLaunch = False
                 wasLoad = False
 			
-
 main()
