@@ -5,45 +5,48 @@ import time, math, copy, requests, json, binascii
 import numpy as np
 from scipy.interpolate import CubicSpline
 from subsections import hexleg, body
-from passwords import Key
+
 #SYSTEMLINK FUNCTIONS
+
+Key = "bvd8X9LweQY9o2eP1NYL-p8mLL9wMAk6YYOnYSiIo0"
+
 def SL_setup():
-     urlBase = "https://api.systemlinkcloud.com/nitag/v2/tags/"
-     headers = {"Accept":"application/json","x-ni-api-key":Key}
-     return urlBase, headers
+    urlBase = "https://api.systemlinkcloud.com/nitag/v2/tags/"
+    headers = {"Accept":"application/json","x-ni-api-key":Key}
+    return urlBase, headers
      
 def Put_SL(Tag, Type, Value):
-     urlBase, headers = SL_setup()
-     urlValue = urlBase + Tag + "/values/current"
-     propValue = {"value":{"type":Type,"value":Value}}
-     try:
-          reply = requests.put(urlValue,headers=headers,json=propValue).text
-     except Exception as e:
-          print(e)         
-          reply = 'failed'
-     return reply
+    urlBase, headers = SL_setup()
+    urlValue = urlBase + Tag + "/values/current"
+    propValue = {"value":{"type":Type,"value":Value}}
+    try:
+        reply = requests.put(urlValue,headers=headers,json=propValue).text
+    except Exception as e:
+        print(e)         
+        reply = 'failed'
+    return reply
 
 def Get_SL(Tag):
-     urlBase, headers = SL_setup()
-     urlValue = urlBase + Tag + "/values/current"
-     try:
-          value = requests.get(urlValue,headers=headers).text
-          data = json.loads(value)
-          #print(data)
-          result = data.get("value").get("value")
-     except Exception as e:
-          print(e)
-          result = 'failed'
-     return result
+    urlBase, headers = SL_setup()
+    urlValue = urlBase + Tag + "/values/current"
+    try:
+        value = requests.get(urlValue,headers=headers).text
+        data = json.loads(value)
+        #print(data)
+        result = data.get("value").get("value")
+    except Exception as e:
+        print(e)
+        result = 'failed'
+    return result
      
 def Create_SL(Tag, Type):
-     urlBase, headers = SL_setup()
-     urlTag = urlBase + Tag
-     propName={"type":Type,"path":Tag}
-     try:
-          requests.put(urlTag,headers=headers,json=propName).text
-     except Exception as e:
-          print(e)
+    urlBase, headers = SL_setup()
+    urlTag = urlBase + Tag
+    propName={"type":Type,"path":Tag}
+    try:
+        requests.put(urlTag,headers=headers,json=propName).text
+    except Exception as e:
+        print(e)
 
 class bezier2d():
     def __init__(self):
@@ -107,6 +110,8 @@ class crabbot():
         gait = self.body.gaitCurrent
         numSteps = len(gait)
         stepCurrent = gait[self.body.gaitStep]
+
+        delayTime = self.interpolate_time(speed, numPoints)
 
         move_t = np.linspace(0, 1, num=numPoints)
         t = np.linspace(0,(1/(numSteps-1)), num=numPoints)
@@ -211,8 +216,6 @@ class crabbot():
     def stand(self):
         numPoints = 20
         startAngle = 60
-
-        delayTime = self.interpolate_time(0.5, numPoints)
         
         self. isMoving = True
         for i in range(numPoints):
@@ -269,12 +272,13 @@ if __name__ == "__main__":
     time.sleep(1.5)
     #Set initial leg positions
     bot.stand()
-    time.sleep(5)
+    time.sleep(2.5)
     moveCMD = False
     while not moveCMD:
         time.sleep(0.01)
-        moveCMD = True if (Get_SL("start05").lower == "true") else False
+        moveCMD = True if (Get_SL("Start05") == "true") else False
     else:
         for i in range(6):
             bot.interpolate_step(1)
+            bot.body.gaitIncrement()
    
