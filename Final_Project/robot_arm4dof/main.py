@@ -149,7 +149,7 @@ def main():
 
     arm = robotArm(baseMotor, shoulderMotor, elbowMotor, clawMotor)
 
-    arm.run_position(10, 0, 245, 25)
+    arm.run_position(10, 245, 0, 25)
     print(arm.base.angle())
     print(arm.shoulder.angle())
     print(arm.elbow.angle())
